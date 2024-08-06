@@ -1,0 +1,7 @@
+*.img
+*.elf
+*.list
+*.map
+copy_sd.sh
+bld/*
+.*
