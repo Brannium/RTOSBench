@@ -1,5 +1,5 @@
 ifndef EXAMPLE
-EXAMPLE = linux
+EXAMPLE = freertos-spike
 endif
 
 ifndef NB_ITER
