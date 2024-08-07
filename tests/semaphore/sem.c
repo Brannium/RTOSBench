@@ -26,6 +26,9 @@ DECLARE_TIME_COUNTERS(no_time_t, r_to_s)
 
 no_main_retval_t main(no_main_argument_t args)
 {
+    volatile int wait = 0;
+    while (wait != 1)
+        ;
 	no_initialize_test(sem_initialize_test);
 	return MAIN_DEFAULT_RETURN;
 }
