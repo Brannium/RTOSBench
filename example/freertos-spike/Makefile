@@ -44,8 +44,9 @@ CFLAGS += -nostdlib -nostartfiles -ffreestanding \
 		  -mabi=ilp32
 
 ALFLAGS += -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions \
-		  -march=$(MARCH)
-LDFLAGS =	-nostartfiles \
+	-I $(WORKDIR)/include \
+	-march=$(MARCH)
+LDFLAGS = -nostartfiles \
 		-Xlinker --defsym=__stack_size=$(STACK_SIZE)
 
 VPATH +=$(FREERTOS_SRC_DIR):
@@ -58,18 +59,20 @@ NOBENCH_OBJS = $(NO_TEST_SRC:.c=.o)
 NOBENCH_TARGET = $(NO_TEST_SRC:.c=.elf)
 
 OBJECTS = $(OBJDIR)/list.o \
-		  $(OBJDIR)/queue.o \
-		  $(OBJDIR)/tasks.o \
-		  $(OBJDIR)/heap_4.o \
-		  $(OBJDIR)/event_groups.o \
-		  $(OBJDIR)/port.o  \
-		  $(OBJDIR)/portASM.o  \
-		  $(OBJDIR)/freertos_porting_layer.o \
-		  $(OBJDIR)/$(NOBENCH_OBJS) \
-		  $(TRACING_OBJS)
-		  #$(OBJDIR)/portISR.o  
-		  #$(OBJDIR)/startup.o \
-		  #$(OBJDIR)/mmu.o \
+	  $(OBJDIR)/queue.o \
+	  $(OBJDIR)/tasks.o \
+	  $(OBJDIR)/heap_4.o \
+	  $(OBJDIR)/event_groups.o \
+	  $(OBJDIR)/port.o  \
+	  $(OBJDIR)/portASM.o  \
+	  $(OBJDIR)/freertos_porting_layer.o \
+	  $(OBJDIR)/$(NOBENCH_OBJS) \
+	  $(TRACING_OBJS)
+	  #$(OBJDIR)/portISR.o  
+	  #$(OBJDIR)/mmu.o \
+#	  $(OBJDIR)/htif.o 
+#	  $(OBJDIR)/riscv-virt.o 
+#	  $(OBJDIR)/start.o 
 
 #RPI_DRIVER_OBJS = $(OBJDIR)/rpi_aux.o \
 #				  $(OBJDIR)/rpi_gpio.o \
@@ -90,11 +93,18 @@ LIBC = $(abspath $(shell $(CC) -print-file-name=libc.a))
 
 TARGETS = $(NO_TEST_SRC:.c=)
 
-all: $(OBJDIR) $(TARGETS)
+all: test $(OBJDIR) $(TARGETS)
+
+test:
+	echo "$(OBJECTS)"
 
 $(TARGETS): % : $(OBJECTS) $(OBJDIR)/fake_rom$(BASE_ADDRESS).lds
-	echo "Using target rule!"
 	$(CC) $(LDFLAGS) -T$(OBJDIR)/fake_rom$(BASE_ADDRESS).lds -o $(OBJDIR)/$@ $(OBJECTS) $(LIBS)
+
+#bld/htif.o: include/htif.c | $(OBJDIR)
+#	$(CC) -c Dgcc $< $(CFLAGS) -o $@
+#bld/riscv-virt.o: include/riscv-virt.c | $(OBJDIR)
+#	$(CC) -c Dgcc $< $(CFLAGS) -o $@
 
 # Build fake_rom
 # Run lds through the C preprocessor, to replace BASE_ADDRESS with the actual
