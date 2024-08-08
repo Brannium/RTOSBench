@@ -42,6 +42,18 @@ _start:
 	li   a1, PRIM_HART
 	bne  a0, a1, secondary
 
+//	// break on primary hart for gdb
+//	li t0, 1
+//1:	bnez t0, 1b
+//
+//	// test
+//	li		t0, 0x1888
+//	csrw	mstatus, t0
+
+.extern freertos_risc_v_trap_handler
+	la		t0, freertos_risc_v_trap_handler	# Load the address of freertos_risc_v_trap_handler into register t0
+	csrw	mtvec, t0							# Write the value in t0 to the mtvec register
+
 	// Primary hart
 	la sp, _stack_top
 

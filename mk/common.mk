@@ -11,6 +11,7 @@ VPATH += $(NOBENCH_PATH)/tests/mq:
 VPATH += $(NOBENCH_PATH)/tests/partition:
 VPATH += $(NOBENCH_PATH)/tests/interrupt:
 VPATH += $(NOBENCH_PATH)/tests/dhrystone:
+VPATH += $(WORKDIR)/startup:
 
 clean:
 	for F in $(CLEANUP); do find -type f -name $$F | xargs rm -f; done

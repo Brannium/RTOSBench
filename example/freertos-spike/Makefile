@@ -10,11 +10,13 @@ OBJDIR = bld
 
 ifeq ($(NOBENCH_TRACING), 2)
 CFLAGS += -finstrument-functions \
-		  -finstrument-functions-exclude-file-list=portASM,tests,tracing \
-		  -finstrument-functions-exclude-file-list=printf,rpi_aux,rpi_base,rpi_gpio,rpi_i2c,rpi_systimer,startup \
-		  -finstrument-functions-exclude-function-list=trace_switch_in,trace_switch_out,no_cycle_get_count,no_serial_write,rpi_aux_mu_string,sprintf \
-		  -I $(NOBENCH_PATH)/tracing \
-		  -DTRACING
+	-finstrument-functions-exclude-file-list=portASM,tests,tracing \
+	-finstrument-functions-exclude-file-list=printf,rpi_aux,rpi_base,rpi_gpio,rpi_i2c,rpi_systimer,startup \
+	-finstrument-functions-exclude-function-list=trace_switch_in,trace_switch_out,no_cycle_get_count,no_serial_write,rpi_aux_mu_string,sprintf \
+	-I $(NOBENCH_PATH)/tracing \
+	-DTRACING
+	-DportasmHANDLE_INTERRUPT=handle_trap \
+
 VPATH += $(NOBENCH_PATH)/tracing:
 TRACING_OBJS = $(OBJDIR)/cygprofile.o
 else
@@ -31,6 +33,7 @@ endif
 
 CFLAGS += -nostdlib -nostartfiles -ffreestanding \
 		  -I $(WORKDIR)/include \
+		  -I $(WORKDIR)/startup \
 		  -I $(FREERTOS_SRC_DIR)/include \
 		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V \
 		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions \
@@ -64,15 +67,15 @@ OBJECTS = $(OBJDIR)/list.o \
 	  $(OBJDIR)/heap_4.o \
 	  $(OBJDIR)/event_groups.o \
 	  $(OBJDIR)/port.o  \
-	  $(OBJDIR)/portASM.o  \
+	  $(OBJDIR)/portASM.o \
 	  $(OBJDIR)/freertos_porting_layer.o \
+	  $(OBJDIR)/htif.o \
+	  $(OBJDIR)/riscv-virt.o \
+	  $(OBJDIR)/start.o \
 	  $(OBJDIR)/$(NOBENCH_OBJS) \
 	  $(TRACING_OBJS)
 	  #$(OBJDIR)/portISR.o  
 	  #$(OBJDIR)/mmu.o \
-#	  $(OBJDIR)/htif.o 
-#	  $(OBJDIR)/riscv-virt.o 
-#	  $(OBJDIR)/start.o 
 
 #RPI_DRIVER_OBJS = $(OBJDIR)/rpi_aux.o \
 #				  $(OBJDIR)/rpi_gpio.o \
