@@ -64,6 +64,7 @@ no_task_retval_t sender(no_task_argument_t args)
 		no_sem_signal(&sem);
 	}
 
+	vSendString("-- Sem: sender finished --");
 	no_task_suspend_self();
 
 	return TASK_DEFAULT_RETURN;
@@ -103,6 +104,7 @@ no_task_retval_t receiver(no_task_argument_t args)
 
 	REPORT_BENCHMARK_RESULTS("-- Sem: Signal unblock --")
 
+	vSendString("-- Sem: receiver finished --");
 	no_task_suspend_self();
 
 	return TASK_DEFAULT_RETURN;
