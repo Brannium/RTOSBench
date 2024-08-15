@@ -26,6 +26,8 @@
 
 #include <FreeRTOS.h>
 
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "riscv-virt.h"
@@ -57,6 +59,24 @@ void vSendString( const char *s )
 	}
 
 	portEXIT_CRITICAL();
+}
+
+void vSendFormatted(const char *format, ...) {
+	#define MAX_BUFFER_SIZE 512
+    char buffer[MAX_BUFFER_SIZE];
+    va_list args;
+
+    // Initialize the va_list with the arguments
+    va_start(args, format);
+
+    // Format the string and store it in buffer
+    vsnprintf(buffer, MAX_BUFFER_SIZE, format, args);
+
+    // Clean up the va_list
+    va_end(args);
+
+    // Send the formatted string using vSendString
+    vSendString(buffer);
 }
 
 void handle_trap(void)

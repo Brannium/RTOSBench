@@ -8,6 +8,8 @@
 #include <queue.h>
 #include "porting_layer.h"
 
+#include "riscv-virt.h"
+
 #ifdef TRACING
 #include "trace.h"
 #endif
@@ -62,8 +64,29 @@ no_time_t no_add_times(const no_time_t* base, unsigned int ticks) {
     return new_time;
 }
 
+uint64_t read_rdcycle_safe() {
+    uint32_t cycle_low, cycle_high1, cycle_high2;
+
+    asm volatile (
+        "1:\n"
+        "   rdcycleh    %0\n"			// Read upper 32-bits (cycle_high1)
+        "   rdcycle     %1\n"			// Read lower 32-bits (cycle_low)
+        "   rdcycleh    %2\n"			// Read upper 32-bits again (cycle_high2)
+        "   bne         %0, %2, 1b"		// If the high bits changed, retry
+        : "=&r" (cycle_high1), "=&r" (cycle_low), "=&r" (cycle_high2)
+    );
+
+    // Combine high and low parts into a 64-bit cycle count
+    return ((uint64_t)cycle_high1 << 32) | cycle_low;
+}
+
 no_time_t no_time_get() {
-    return xTaskGetTickCount();
+	volatile no_time_t counter_value;
+	counter_value = read_rdcycle_safe();
+	//asm volatile ("rdcycle %0" : "=r" (counter_value));
+	//asm volatile ("rdinstret %0" : "=r" (counter_value));		// behaves the same way as rdcycle
+	return counter_value;
+//    return xTaskGetTickCount();
 }
 
 long no_time_diff(const no_time_t* t1, const no_time_t* t2) {
@@ -124,7 +147,8 @@ void no_mq_receive(no_mq_t* mq) {
 }
 
 void no_serial_write(const char* string) {
-    printf("%s\n", string);
+    //printf("%s\n", string);
+	vSendString(string);
 }
 
 void no_cycle_reset_counter() {
@@ -136,11 +160,21 @@ unsigned int no_cycle_get_count() {
 }
 
 void no_single_result_report(char* prefix, int64_t value) {
-    printf("%s%lld\n", prefix, value);
+    //printf("%s%lld\n", prefix, value);
+    // todo calc prefix
+//	char buf[strlen(prefix) + 20 + 1 + 8]; // size of prefix + max size of value + end + buffer
+//	sprintf(buf, "%s%lld", value);
+//	vSendString(buf);
+	vSendFormatted("%s%lld", prefix, value);
 }
 
 void no_result_report(int64_t max, int64_t min, int64_t average) {
-    printf("max=%lld\nmin=%lld\naverage=%lld\n", max, min, average);
+	asm ("nop");
+    //printf("max=%lld\nmin=%lld\naverage=%lld\n", max, min, average);
+//	char buf[20 + 3 * 20 + 1 + 8]; // 3 * max size of value +  + buffer
+//	sprintf(buf, "max=%lld\nmin=%lld\naverage=%lld", max, min, average);
+//	vSendString(buf);
+	vSendFormatted("max=%lld\nmin=%lld\naverage=%lld", max, min, average);
 }
 
 #ifdef TRACING

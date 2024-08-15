@@ -34,6 +34,7 @@ endif
 CFLAGS += -nostdlib -nostartfiles -ffreestanding \
 		  -I $(WORKDIR)/include \
 		  -I $(WORKDIR)/startup \
+		  -I $(WORKDIR)/drivers \
 		  -I $(FREERTOS_SRC_DIR)/include \
 		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V \
 		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions \
@@ -50,6 +51,7 @@ ALFLAGS += -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/R
 	-I $(WORKDIR)/include \
 	-march=$(MARCH)
 LDFLAGS = -nostartfiles \
+		-g \
 		-Xlinker --defsym=__stack_size=$(STACK_SIZE)
 
 VPATH +=$(FREERTOS_SRC_DIR):
@@ -61,28 +63,27 @@ VPATH +=$(FREERTOS_SRC_DIR)/../Demo/CORTEX_A7_BCM2836/Drivers:
 NOBENCH_OBJS = $(NO_TEST_SRC:.c=.o)
 NOBENCH_TARGET = $(NO_TEST_SRC:.c=.elf)
 
-OBJECTS = $(OBJDIR)/list.o \
-	  $(OBJDIR)/queue.o \
-	  $(OBJDIR)/tasks.o \
-	  $(OBJDIR)/heap_4.o \
-	  $(OBJDIR)/event_groups.o \
-	  $(OBJDIR)/port.o  \
-	  $(OBJDIR)/portASM.o \
-	  $(OBJDIR)/freertos_porting_layer.o \
-	  $(OBJDIR)/htif.o \
-	  $(OBJDIR)/riscv-virt.o \
-	  $(OBJDIR)/start.o \
-	  $(OBJDIR)/$(NOBENCH_OBJS) \
-	  $(TRACING_OBJS)
-	  #$(OBJDIR)/portISR.o  
-	  #$(OBJDIR)/mmu.o \
+OBJECTS = \
+	$(OBJDIR)/riscv-virt.o \
+	$(OBJDIR)/htif.o \
+	$(OBJDIR)/event_groups.o \
+	$(OBJDIR)/list.o \
+	$(OBJDIR)/queue.o \
+	$(OBJDIR)/stream_buffer.o \
+	$(OBJDIR)/tasks.o \
+	$(OBJDIR)/timers.o \
+	$(OBJDIR)/heap_4.o \
+	$(OBJDIR)/port.o  \
+	$(OBJDIR)/freertos_porting_layer.o \
+	$(WORKDIR)/setup.o \
+	$(OBJDIR)/$(NOBENCH_OBJS) \
+	$(TRACING_OBJS)
+	#$(OBJDIR)/portISR.o  
+	#$(OBJDIR)/mmu.o 
 
-#RPI_DRIVER_OBJS = $(OBJDIR)/rpi_aux.o \
-#				  $(OBJDIR)/rpi_gpio.o \
-#				  $(OBJDIR)/rpi_i2c.o \
-#				  $(OBJDIR)/rpi_irq.o \
-#				  $(OBJDIR)/rpi_systimer.o \
-#				  $(OBJDIR)/printf.o \
+ASMS = \
+	$(OBJDIR)/start.o \
+	$(OBJDIR)/portASM.o
 
 CC = riscv32-unknown-elf-gcc
 AS = riscv32-unknown-elf-as
@@ -96,20 +97,11 @@ LIBC = $(abspath $(shell $(CC) -print-file-name=libc.a))
 
 TARGETS = $(NO_TEST_SRC:.c=)
 
-all: test $(OBJDIR) $(TARGETS)
+all: $(OBJDIR) $(TARGETS)
 
-test:
-	echo "$(OBJECTS)"
+$(TARGETS): % : $(OBJECTS) $(ASMS) $(OBJDIR)/fake_rom$(BASE_ADDRESS).lds
+	$(CC) $(LDFLAGS) -T$(OBJDIR)/fake_rom$(BASE_ADDRESS).lds -o $(OBJDIR)/$@ $(OBJECTS) $(ASMS) $(LIBS)
 
-$(TARGETS): % : $(OBJECTS) $(OBJDIR)/fake_rom$(BASE_ADDRESS).lds
-	$(CC) $(LDFLAGS) -T$(OBJDIR)/fake_rom$(BASE_ADDRESS).lds -o $(OBJDIR)/$@ $(OBJECTS) $(LIBS)
-
-#bld/htif.o: include/htif.c | $(OBJDIR)
-#	$(CC) -c Dgcc $< $(CFLAGS) -o $@
-#bld/riscv-virt.o: include/riscv-virt.c | $(OBJDIR)
-#	$(CC) -c Dgcc $< $(CFLAGS) -o $@
-
-# Build fake_rom
 # Run lds through the C preprocessor, to replace BASE_ADDRESS with the actual
 # value. It might be simpler to use sed instead.
 # removed $(CPPFLAGS)

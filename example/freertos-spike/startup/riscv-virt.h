@@ -46,6 +46,7 @@
 
 int xGetCoreID( void );
 void vSendString( const char * s );
+void vSendFormatted( const char *format, ... );
 
 #endif /* __ASSEMBLER__ */
 
