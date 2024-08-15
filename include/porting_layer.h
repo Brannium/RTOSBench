@@ -32,6 +32,8 @@
 	#define NO_INIT_TIME_STATS_AVERAGE(avg, cyc, n) ((long)avg + (((long)cyc - (long)avg) / (n + 1)))
 #endif
 
+//#define NO_VERBOSE_RESULTS
+
 //#define LOG_DEBUG(x) no_serial_write((x));
 #define LOG_DEBUG(x)
 
@@ -133,6 +135,7 @@
 		} while (0);
 #else
 #define REPORT_BENCHMARK_RESULTS(STR_PTR) do { \
+			no_serial_write(STR_PTR); \
 			for (int _i; _i < NB_ITER; _i++) { \
 				no_single_result_report("", no_cycles_results[_i]); \
 			} \
