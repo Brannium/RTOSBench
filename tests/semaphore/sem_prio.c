@@ -58,7 +58,7 @@ no_task_retval_t sem_prio_initialize_test(no_task_argument_t args)
 
 		med_tasks_handle[i] = no_create_task(TB_med_prio,
 				workload_tasks_name[i],
-				NO_DECREASE_TASK_PRIO(BASE_PRIO, 1) /* TB_med_prio is the low priority task. */
+				NO_DECREASE_TASK_PRIO(BASE_PRIO, 1) /* TB_med_prio is the med priority task. */
 			);
 	}
 

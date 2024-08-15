@@ -64,7 +64,7 @@ no_task_retval_t sem_initialize_test(no_task_argument_t args)
 		workload_tasks_name[i][2] = 0;
 		workload_tasks_name[i][3] = 0;
 		/* Workoad tasks are the lowest priority */
-		workload_tasks_handle[i] = no_create_task(workload_task, workload_tasks_name[i], BASE_PRIO - 2);
+		workload_tasks_handle[i] = no_create_task(workload_task, workload_tasks_name[i], NO_DECREASE_TASK_PRIO(BASE_PRIO, 2));
 	}
 
 	return TASK_DEFAULT_RETURN;
