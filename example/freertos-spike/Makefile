@@ -75,7 +75,7 @@ OBJECTS = \
 	$(OBJDIR)/heap_4.o \
 	$(OBJDIR)/port.o  \
 	$(OBJDIR)/freertos_porting_layer.o \
-	$(WORKDIR)/setup.o \
+	$(OBJDIR)/setup.o \
 	$(OBJDIR)/$(NOBENCH_OBJS) \
 	$(TRACING_OBJS)
 	#$(OBJDIR)/portISR.o  
