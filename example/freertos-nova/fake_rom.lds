@@ -3,10 +3,8 @@ ENTRY( _start )
 
 MEMORY
 {
-	/* Fake ROM area */
-        /* BASE_ADDRESS is replaced with the real value by the Makefile. */
-	rom (rxa) : ORIGIN = BASE_ADDRESS, LENGTH = 512K
-	ram (wxa) : ORIGIN = BASE_ADDRESS + 512K, LENGTH = 512K
+	/* BASE_ADDRESS is replaced with the real value by the Makefile. */
+	ram (wxa) : ORIGIN = BASE_ADDRESS, LENGTH = 0x00020000
 }
 
 SECTIONS
@@ -15,7 +13,7 @@ SECTIONS
 	{
 		_text = .;
 		KEEP (*(SORT_NONE(.init)))
-	} >rom AT>rom
+	} >ram
 	
 	.text :
 	{
@@ -23,23 +21,23 @@ SECTIONS
 		*(.text.startup .text.startup.*)
 		*(.text .text.*)
 		*(.gnu.linkonce.t.*)
-	} >rom AT>rom
+	} >ram
 	
 	.fini :
 	{
 		KEEP (*(SORT_NONE(.fini)))
 		_etext = .;
-	} >rom AT>rom
+	} >ram
 
 	.rodata.align ALIGN(4):
 	{
 		_rodata = .;
-	} >rom AT>rom
+	} >ram
 
 	.rodata.start :
 	{
 		_rodata_lma = LOADADDR(.rodata.start);
-	} >rom AT>rom
+	} >ram
 
 	.rodata :
 	{
@@ -49,18 +47,18 @@ SECTIONS
 
 		. = ALIGN(4);
 		_erodata = .;
-	} >rom AT>rom
+	} >ram
 
 	.data.align :
 	{
 		. = ALIGN(4);
 		_data = .;
-	} >ram AT>rom
+	} >ram
 
 	.data.start :
 	{
 		_data_lma = LOADADDR(.data.start);
-	} >ram AT>rom
+	} >ram
 
 	.data :
 	{
@@ -80,18 +78,18 @@ SECTIONS
 
 		. = ALIGN(4);
 		_edata = .;
-	} >ram AT>rom
+	} >ram
 
 	.bss.align :
 	{
 		. = ALIGN(4);
 		_bss = .;
-	} >ram AT>rom
+	} >ram
 
 	.bss.start :
 	{
 		_bss_lma = LOADADDR(.bss.start);
-	} >ram AT>rom
+	} >ram
 
 	.bss :
 	{
@@ -103,7 +101,7 @@ SECTIONS
 
 		. = ALIGN(4);
 		_ebss = .;
-	} >ram AT>rom
+	} >ram
 
 	. = ALIGN(8);
 	_end = .;
@@ -113,5 +111,5 @@ SECTIONS
 		. = ALIGN(16);
 		. += __stack_size;
 		_stack_top = .;
-	} >ram AT>ram
+	} >ram
 }

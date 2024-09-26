@@ -2,7 +2,7 @@ NOBENCH_PATH = ../..
 WORKDIR = $(shell pwd)
 FREERTOS_SRC_DIR =$(WORKDIR)/FreeRTOS/Source
 
-MARCH = rv32imah_zicsr
+MARCH = rv32izmmul_zicsr
 BASE_ADDRESS ?= 0x80000000
 STACK_SIZE=300
 
@@ -45,14 +45,18 @@ CFLAGS += -nostdlib -nostartfiles -ffreestanding \
 		  -MD \
 		  -O2 -g \
 		  -march=$(MARCH) \
-		  -mabi=ilp32
+		  -mabi=ilp32 \
+		  -ffunction-sections -fdata-sections \
+		  -mrelax
 
 ALFLAGS += -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions \
 	-I $(WORKDIR)/include \
 	-march=$(MARCH)
 LDFLAGS = -nostartfiles \
 		-g \
-		-Xlinker --defsym=__stack_size=$(STACK_SIZE)
+		-Xlinker --defsym=__stack_size=$(STACK_SIZE) \
+		-Wl,--gc-sections \
+		-mrelax
 
 VPATH +=$(FREERTOS_SRC_DIR):
 VPATH +=$(FREERTOS_SRC_DIR)/portable/GCC/RISC-V:
