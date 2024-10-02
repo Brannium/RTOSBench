@@ -26,12 +26,17 @@ DECLARE_TIME_COUNTERS(no_time_t, r_to_s)
 
 no_main_retval_t main(no_main_argument_t args)
 {
+	// TODO remove this after testing uart
+	#include "riscv-virt.h"
+	vSendString("Hello World, i'm sem!\n");
+
 	no_initialize_test(sem_initialize_test);
 	return MAIN_DEFAULT_RETURN;
 }
 
 no_task_retval_t sem_initialize_test(no_task_argument_t args)
 {
+	vSendString("sem_initialize_test\n");
 	no_sem_create(&sem, 0);
 
 	tasks_handle[0] = no_create_task(sender,
@@ -43,6 +48,7 @@ no_task_retval_t sem_initialize_test(no_task_argument_t args)
 			"R",
 			BASE_PRIO /* receiver is the high priority task. */
 		);
+	vSendString("created tasks\n");
 
 	return TASK_DEFAULT_RETURN;
 }
@@ -50,6 +56,7 @@ no_task_retval_t sem_initialize_test(no_task_argument_t args)
 no_task_retval_t sender(no_task_argument_t args)
 {
 	int32_t i;
+	vSendString("sender\n");
 
 	/* 2b - Benchmark. */
 	for (i = 0; i < NB_ITER + 1; i++)
@@ -73,6 +80,7 @@ no_task_retval_t sender(no_task_argument_t args)
 no_task_retval_t receiver(no_task_argument_t args)
 {
 	int32_t i;
+	vSendString("receiver\n");
 	DECLARE_TIME_STATS(int64_t)
 
 	/* 1 - Let sender start */

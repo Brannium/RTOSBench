@@ -33,6 +33,12 @@
 #include "riscv-virt.h"
 #include "htif.h"
 
+#ifndef HTIF_SPIKE
+#include "uart.h"
+#include "platform.h"
+static struct uart uart0;
+#endif
+
 int xGetCoreID( void )
 {
 	int id;
@@ -44,19 +50,24 @@ int xGetCoreID( void )
 
 /* Use a debugger to set this to 0 if this binary was loaded through gdb instead
  * of spike's ELF loader. HTIF only works if spike's ELF loader was used. */
-volatile int use_htif = 1;
+void initUARTNova() {
+	uart_initialize(&uart0, (volatile void *)PLATFORM_UART0_BASE);
+	uart_set_divisor(&uart0, uart_baud2divisor(115200, PLATFORM_SYSCLK_FREQ));
+}
 
 void vSendString( const char *s )
 {
 	portENTER_CRITICAL();
 
-	if (use_htif) {
+	#ifdef HTIF_SPIKE
 		while (*s) {
 			htif_putc(*s);
 			s++;
 		}
 		htif_putc('\n');
-	}
+	#else			// use NOVA UART
+		uart_tx_string(&uart0, s);
+	#endif
 
 	portEXIT_CRITICAL();
 }

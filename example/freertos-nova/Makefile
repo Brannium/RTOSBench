@@ -3,7 +3,7 @@ WORKDIR = $(shell pwd)
 FREERTOS_SRC_DIR =$(WORKDIR)/FreeRTOS/Source
 
 MARCH = rv32izmmul_zicsr
-BASE_ADDRESS ?= 0x80000000
+BASE_ADDRESS ?= 0x00000000
 STACK_SIZE=300
 
 OBJDIR = bld
@@ -35,9 +35,10 @@ CFLAGS += -nostdlib -nostartfiles -ffreestanding \
 		  -I $(WORKDIR)/include \
 		  -I $(WORKDIR)/startup \
 		  -I $(WORKDIR)/drivers \
+		  -I $(WORKDIR)/libsoc \
 		  -I $(FREERTOS_SRC_DIR)/include \
 		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V \
-		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions \
+		  -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RISCV_no_extensions \
 		  -I $(FREERTOS_SRC_DIR)/../Demo/RISC-V-spike-htif-GCC \
 		  -I $(NOBENCH_PATH)/include \
 		  -D RPI2 \
@@ -49,7 +50,7 @@ CFLAGS += -nostdlib -nostartfiles -ffreestanding \
 		  -ffunction-sections -fdata-sections \
 		  -mrelax
 
-ALFLAGS += -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions \
+ALFLAGS += -I $(FREERTOS_SRC_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RISCV_no_extensions \
 	-I $(WORKDIR)/include \
 	-march=$(MARCH)
 LDFLAGS = -nostartfiles \
